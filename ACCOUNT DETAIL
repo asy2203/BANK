@@ -1,0 +1,246 @@
+#include<iostream>
+#include<fstream>
+#include<cstring>
+using namespace std;
+class Account
+{
+    char fname[50],lname[50];
+    long acc;
+    float balance;
+    public: 
+         void add();
+         void show();
+         long ret_acc();
+         void Deposit(int);
+         void Withdraw(int);
+};
+void Account::Deposit(int n)
+{
+    balance+=n;
+    cout<<"\nRemaining balance: "<<balance;
+}
+void Account::Withdraw(int n)
+{
+    if(n>balance)
+    {
+        cout<<"\nInsufficient amount.";
+        cout<<"\nRemaining balance: "<<balance;
+    }
+    else
+    {
+        balance-=n;
+        cout<<"\nRemaining balance: "<<balance;
+    }
+}
+long Account::ret_acc()
+{
+    return acc;
+}
+void Account::add()
+{
+    cin.ignore();
+    cout<<"\nEnter your account number: "; cin>>acc;
+    cout<<"\nEnter your first name: "; cin>>fname;
+    cout<<"\nEnter your last name: "; cin>>lname;
+    cout<<"\nEnter balance: "; cin>>balance;
+}
+void Account::show()
+{
+    cout<<"\nAccount number: "<<acc;
+    cout<<"\nFirst name: "<<fname;
+    cout<<"\nLast name: "<<lname;
+    cout<<"\nRemaining balance: "<<balance;
+}
+void add_acc()
+{
+    Account A;
+    A.add();
+    fstream file;
+    file.open("account.txt",  ios::out);
+    if(!file)
+    {
+        cout<<"\nFile could not open.";
+        cin.ignore();
+        cin.get();
+        return;
+    }
+    file.write(reinterpret_cast<char*> (&A), sizeof(A));
+    file.close();
+    cin.ignore();
+    cin.get();
+}
+void search_acc(int n)
+{
+    Account A;
+    fstream file;
+    file.open("account.txt", ios::in | ios::out);
+    if(!file)
+    {
+        cout<<"File could not open.";
+        cin.ignore();
+        cin.get();
+        return;
+    }
+    file.seekg(0, ios::beg);
+    while(file.read(reinterpret_cast<char*> (&A), sizeof(A)))
+    {
+        if(A.ret_acc()==n)
+        {
+            A.show();
+        }
+        else
+        {cout<<"\nAccount does not exist.";}
+    }
+    file.close();
+    cin.ignore();
+    cin.get();
+}
+void edit_acc(int n)
+{
+    Account A;
+    fstream file;
+    file.open("account.txt",ios::in |ios::out);
+    if(!file)
+    {
+        cout<<"\nFile could not open!";
+        cin.ignore();
+        cin.get();
+        return;
+    }
+    while(file.read(reinterpret_cast<char*> (&A), sizeof(A)));
+    {
+        if(A.ret_acc()==n)
+        {
+            cout<<"\nEdit the details of your account.";
+            A.add();
+        }
+        int pos=(-1)*static_cast<int>(sizeof(A));
+        file.seekp(pos, ios::cur);
+        file.write(reinterpret_cast<char*> (&A), sizeof(A));
+        cout<<"\nRecord updated.!";
+    }
+    file.close();
+}
+void delete_acc(int n)
+{
+    Account A;
+    fstream file, ffile;
+    ffile.open("Temp.txt", ios::in | ios::out);
+    file.open("account.txt", ios::in | ios::out);
+    if(!file)
+    {
+        cout<<"\nFile could not be open!";
+        cin.ignore();
+        cin.get();
+    }
+    while(file.read(reinterpret_cast<char*> (&A), sizeof(A)))
+    {
+        if(A.ret_acc()!=n)
+        {
+            ffile.write(reinterpret_cast<char*> (&A), sizeof(A));
+        }
+    }
+    file.close();
+    ffile.close();
+    remove("account.txt");
+    rename("Temp.txt", "account.txt");
+    cin.ignore();
+    cin.get();
+}
+void deposit(int n)
+{
+    float d_balance;
+    Account A;
+    fstream file;
+    file.open("account.txt");
+    if(!file)
+    {
+        cout<<"\nFile could not open!";
+        cin.ignore();
+        cin.get();
+        return;
+    }
+    while(file.read(reinterpret_cast<char*> (&A), sizeof(A)))
+    {
+        if(A.ret_acc()==n)
+        {
+            cout<<"\nEnter the amount you want ot deposit: "; cin>>d_balance;
+            A.Deposit(d_balance);
+        }
+        else{ cout<<"\nAccount does not exist."; }
+    }
+    file.close();
+    cin.ignore();
+    cin.get();
+}
+void withdraw(int n)
+{
+    float w_balance;
+    Account A;
+    fstream file;
+    file.open("account.txt");
+    if(!file)
+    {
+        cout<<"\nFile could not open.";
+        cin.ignore();
+        cin.get();
+        return;
+    }
+    while(file.read(reinterpret_cast<char*> (&A), sizeof(A)))
+    {
+        if(A.ret_acc()==n)
+        {
+            cout<<"\nEnter the amount you want to withdraw: "; cin>>w_balance;
+            A.Withdraw(w_balance);
+        }
+        else { cout<<"\nAccount does not exist.";}
+    }
+    file.close();
+    cin.ignore();
+    cin.get();
+}
+
+int main()
+{
+    int option;
+    long acc_no;
+    cout<<"****Account Information System****";
+    do
+    {
+        cout<<"\nSelect option from below: ";
+        cout<<"\n1. Add account.\n2. Search Account.\n3. Update account.\n4. Delete account.\n5. Deposit.\n6. Withdraw\n7. Exit. ";
+        cout<<"\nEnter your option: "; cin>>option;
+        switch(option)
+        {
+            case 1:
+                add_acc();
+                break;
+            case 2:
+                cout<<"\nEnter your account number: "; cin>>acc_no;
+                search_acc(acc_no);
+                break;
+            case 3:
+                cout<<"\nEnter your account number: "; cin>>acc_no;
+                edit_acc(acc_no);
+                break;
+            case 4:
+                cout<<"\nEnter your account number: "; cin>>acc_no;
+                delete_acc(acc_no);
+                break;
+            case 5:
+                cout<<"\nEnter your account number: "; cin>>acc_no;
+                deposit(acc_no);
+                break;
+            case 6:
+                cout<<"\nEnter your account number: "; cin>>acc_no;
+                withdraw(acc_no);
+                break;
+            case 7:
+                break; 
+            default:
+                cout<<"\nChoose the correct option.";
+                break;
+        }
+    } while(option!= 5);
+    return 0;
+}
